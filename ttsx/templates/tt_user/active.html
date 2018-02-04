@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        function load() {
+            t1 = parseInt($('#t1').text()) - 1;
+            if (t1 <= 0) {
+                location.href = '{{ url }}';
+            } else {
+                $('#t1').text(t1);
+            }
+        }
+        //setTimeout(load,5000);
+        setInterval(load, 1000);
+    </script>
+</head>
+<body>
+{% if ok == 1 %}
+    <h1>激活成功，请登录</h1>
+{% else %}
+    <h1>账户不存在，请注册</h1>
+{% endif %}
+<hr>
+<span id="t1">5</span>秒后自动跳转
+</body>
+</html>

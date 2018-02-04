@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block head %}
+    <script>
+    $(function () {
+        //加载所有的省信息
+        $.get('/user/sheng/',function (data) {//{sheng:[]}
+            var pro=$('#pro');//{}
+            var slist=data.sheng;//[{},{},{}....]
+            $.each(slist,function (i,n) {//i表示某个元素的下标，n代表某个元素
+                //n===>{id:***,title:***}  n['id'] n.id
+                pro.append('<option value="'+n.id+'">'+n.title+'</option>');
+            });
+        });
+        //为省绑定change事件，加载相应的市信息
+        $('#pro').change(function () {
+            //this代表pro，value表示选中的option的value
+            var sid=$(this).val();
+            $.get('/user/sheng/',{'sid':sid},function (data) {//{sheng:[]}
+                var slist=data.sheng;
+                var shi=$('#city').empty().append('<option value="0">请选择市</option>');
+                $('#dis').empty().append('<option value="0">请选择区县</option>');
+                $.each(slist,function (i,n) {
+                    shi.append('<option value="'+n.id+'">'+n.title+'</option>');
+                })
+            });
+        });
+        //为市绑定change事件，加载相应的区县信息
+        $('#city').change(function () {
+            //this代表city，value表示选中的option的value
+            var sid=$(this).val();
+            $.get('/user/sheng/',{'sid':sid},function (data) {//{sheng:[]}
+                var slist=data.sheng;
+                var qx=$('#dis').empty().append('<option value="0">请选择区县</option>');
+                $.each(slist,function (i,n) {
+                    qx.append('<option value="'+n.id+'">'+n.title+'</option>');
+                })
+            });
+        });
+    });
+    </script>
+{% endblock head %}
+{% block body %}
+    <div class="main_con clearfix">
+        <div class="left_menu_con clearfix">
+            <h3>用户中心</h3>
+            <ul>
+                <li><a href="/user/info/">· 个人信息</a></li>
+                <li><a href="/user/order/">· 全部订单</a></li>
+                <li><a href="#" class="active">· 收货地址</a></li>
+            </ul>
+        </div>
+        <div class="right_content clearfix">
+            <h3 class="common_title2">收货地址</h3>
+            <div class="site_con">
+                <dl>
+                    {% for addr in addrlist %}
+                        <dd>{{ addr.addr }} （{{ addr.sjr }} 收） {{ addr.sjh }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
+            <h3 class="common_title2">编辑地址</h3>
+            <div class="site_con">
+                <form method="post" action="/user/site_add/">
+                    <div class="form_group">
+                        <label>收件人：</label>
+                        <input type="text" name="sjr">
+                    </div>
+                    <div class="form_group">
+                        <label>选择地址：</label>
+                        <select id="pro" name="sheng">
+                            <option value="0">请选择省</option>
+                        </select>
+                        <select id="city" name="shi">
+                            <option value="0">请选择市</option>
+                        </select>
+                        <select id="dis" name="qx">
+                            <option value="0">请选择区县</option>
+                        </select>
+                    </div>
+                    <div class="form_group">
+                        <label>详细地址：</label>
+                        <input type="text" name="addr">
+                    </div>
+                    <div class="form_group">
+                        <label>手机：</label>
+                        <input type="text" name="sjh">
+                    </div>
+
+                    <input type="submit" value="提交" class="info_submit">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

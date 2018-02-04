@@ -1,0 +1,85 @@
+{% extends 'tt_goods/base.html' %}
+
+{% block head %}
+    <script>
+    function add_cart(gid) {
+        $.post('/cart/add/',
+            {'gid':gid,'nums':1},
+            function (data) {
+                if(data.islogin==1){
+                    location.href='/user/login/';
+                }else{
+                    if(data.ok==1){
+                        if(data.msg!=''){
+                            alert(data.msg);
+                        }
+                        $('#show_count').html(data.count);
+                    }else{
+                        alert('加入购物车失败');
+                    }
+                }
+            }
+        );
+    }
+    </script>
+{% endblock head %}
+
+{% block breadcrumb %}
+
+    <div class="breadcrumb">
+        <a href="#">全部分类</a>
+        <span>></span>
+        <a href="#">{{ t.ttitle }}</a>
+    </div>
+{% endblock breadcrumb %}
+
+
+{% block r_wrap %}
+    <div class="sort_bar">
+        <a href="/list{{ t.id }}/1/1/" {% if order == '1' %}class="active"{% endif %}>默认</a>
+
+        {% if order == '2' %}
+            <a href="/list{{ t.id }}/1/3/" class="active">价格(↑)</a>
+        {% elif order == '3' %}
+            <a href="/list{{ t.id }}/1/2/" class="active">价格(↓)</a>
+        {% else %}
+            <a href="/list{{ t.id }}/1/2/">价格</a>
+        {% endif %}
+
+        <a href="/list{{ t.id }}/1/4/" {% if order == '4' %}class="active"{% endif %}>人气</a>
+    </div>
+
+    <ul class="goods_type_list clearfix">
+        {% for g in page %}
+            <li>
+                <a href="/{{ g.id }}/"><img src="/static/media/{{ g.gpic }}"></a>
+                <h4><a href="/{{ g.id }}/">{{ g.gtitle }}</a></h4>
+                <div class="operate">
+                    <span class="prize">￥{{ g.gprice }}</span>
+                    <span class="unit">{{ g.price }}/{{ g.gunit }}</span>
+                    <a href="javascript:add_cart({{ g.id }});" class="add_goods" title="加入购物车"></a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="pagenation">
+        {% if page.has_previous %}
+            <a href="/list{{ t.id }}/1/{{ order }}/">首页</a>
+            <a href="/list{{ t.id }}/{{ page.number|add:-1 }}/{{ order }}/">上一页</a>
+        {% endif %}
+
+        {% for index in plilst %}
+            {% if index == page.number %}
+                <a href="#" class="active">{{ index }}</a>
+            {% else %}
+                <a href="/list{{ t.id }}/{{ index }}/{{ order }}/">{{ index }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page.has_next %}
+            <a href="/list{{ t.id }}/{{ page.number|add:1 }}/{{ order }}/">下一页</a>
+            <a href="/list{{ t.id }}/{{ page.paginator.num_pages }}/{{ order }}/">末页</a>
+        {% endif %}
+    </div>
+{% endblock r_wrap %}

@@ -1,0 +1,121 @@
+{% extends 'tt_goods/base.html' %}
+
+{% block head %}
+    <script>
+        $(function () {
+            //数量计算
+            $('.num_show').blur(function () {
+                var num = parseInt($(this).val());
+                if (isNaN(num)) {//如果当前输入的值不是一个数字则设置为1
+                    num = 1;
+                } else if (num <= 0) {
+                    num = 1;
+                } else if (num >= 5) {
+                    num = 5;
+                }
+                $(this).val(num);
+                var price = parseFloat($('.show_pirze em').text());
+                var total = price * num;
+                $('.total em').text(total.toFixed(2) + '元');
+            });
+            $('.add').click(function () {
+                var num = parseInt($('.num_show').val());
+                num++;
+                $('.num_show').val(num).blur();//blur()表示触发失去焦点事件，则对应的函数会被执行
+            });
+            $('.minus').click(function () {
+                var num = parseInt($('.num_show').val());
+                num--;
+                $('.num_show').val(num).blur();//blur()表示触发失去焦点事件，则对应的函数会被执行
+            });
+            //加入购物车
+            $('#add_cart').click(function () {
+                $.post('/cart/add/',
+                    {'gid': $('#gid').val(), 'nums': $('.num_show').val()},
+                    function (data) {
+                        if(data.islogin==1){
+                            location.href='/user/login/';
+                            return;
+                        }
+                        if (data.ok == 1) {
+                            if(data.msg!=''){
+                                alert(data.msg);
+                            }
+                            //加入成功，则播放动画
+                            var $add_x = $('#add_cart').offset().top;
+                            var $add_y = $('#add_cart').offset().left;
+
+                            var $to_x = $('#show_count').offset().top;
+                            var $to_y = $('#show_count').offset().left;
+
+                            $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'}).stop().animate({
+                                    'left': $to_y + 7,
+                                    'top': $to_x + 7
+                                },
+                                "slow", function () {
+                                    $(".add_jump").fadeOut('slow', function () {
+                                        $('#show_count').html(data.count);
+                                    });
+
+                                });
+
+
+                        } else {
+                            alert('加入购物车失败')
+                        }
+                    }
+                );
+            });
+        });
+    </script>
+{% endblock head %}
+
+{% block breadcrumb %}
+    <div class="breadcrumb">
+        <a href="#">全部分类</a>
+        <span>></span>
+        <a href="#">{{ goods.gtype.ttitle }}</a>
+        <span>></span>
+        <a href="#">商品详情</a>
+    </div>
+
+    <div class="goods_detail_con clearfix">
+        <div class="goods_detail_pic fl"><img src="/static/media/{{ goods.gpic }}"></div>
+
+        <div class="goods_detail_list fr">
+            <h3>{{ goods.gtitle }}<input type="hidden" id="gid" value="{{ goods.id }}"></h3>
+            <p>{{ goods.gjianjie }}</p>
+            <div class="prize_bar">
+                <span class="show_pirze">¥<em>{{ goods.gprice }}</em></span>
+                <span class="show_unit">单  位：{{ goods.gunit }}</span>
+            </div>
+            <div class="goods_num clearfix">
+                <div class="num_name fl">数 量：</div>
+                <div class="num_add fl">
+                    <input type="text" class="num_show fl" value="1">
+                    <a href="javascript:;" class="add fr">+</a>
+                    <a href="javascript:;" class="minus fr">-</a>
+                </div>
+            </div>
+            <div class="total">总价：<em>{{ goods.gprice }}元</em></div>
+            <div class="operate_btn">
+                <a href="javascript:;" class="buy_btn">立即购买</a>
+                <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumb %}
+
+{% block r_wrap %}
+    <ul class="detail_tab clearfix">
+        <li class="active">商品介绍</li>
+        <li>评论</li>
+    </ul>
+
+    <div class="tab_content">
+        {{ goods.gcontent|safe }}
+    </div>
+
+    <div class="add_jump"></div>
+{% endblock r_wrap %}
+

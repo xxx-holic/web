@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+$(function () {
+    $('.col04').each(function () {
+        var count=parseInt($(this).prev().text());
+        var price=parseFloat($(this).prev().prev().find('span').text());
+        var total=count*price;
+        $(this).text(total.toFixed(2)+'元');
+    });
+
+});
+</script>
+{% endblock head %}
+
+{% block body %}
+	<div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>用户中心</h3>
+			<ul>
+				<li><a href="/user/info/">· 个人信息</a></li>
+				<li><a href="#" class="active">· 全部订单</a></li>
+				<li><a href="/user/site/">· 收货地址</a></li>
+			</ul>
+		</div>
+		<div class="right_content clearfix">
+				<h3 class="common_title2">全部订单</h3>
+{% for order in page %}
+				<ul class="order_list_th w978 clearfix">
+					<li class="col01">{{ order.odate }}</li>
+					<li class="col02">订单号：{{ order.oid }}</li>
+					<li class="col02 stress">
+                        {% if order.oIsPay %}
+                            已支付
+                        {% else %}
+                        未支付
+                        {% endif %}
+                    </li>
+				</ul>
+
+				<table class="order_list_table w980">
+					<tbody>
+						<tr>
+							<td width="55%">
+
+                                {% for detail in order.orderdetailinfo_set.all %}
+								<ul class="order_goods_list clearfix">					
+									<li class="col01"><img src="/static/media/{{ detail.goods.gpic }}"></li>
+                                    <li class="col02">{{ detail.goods.gtitle }}<em><span>{{ detail.price }}</span>元/{{ detail.goods.gunit }}</em></li>
+									<li class="col03">{{ detail.count }}</li>
+									<li class="col04">元</li>
+								</ul>
+                                {% endfor %}
+
+							</td>
+							<td width="15%">{{ order.ototal }}元</td>
+
+                        {% if order.oIsPay %}
+                            <td width="15%">已付款</td>
+                            <td width="15%"><a href="#" class="oper_btn">查看物流</a></td>
+                        {% else %}
+                        <td width="15%">待付款</td>
+                            <td width="15%"><a href="#" class="oper_btn">去付款</a></td>
+                        {% endif %}
+						</tr>
+					</tbody>
+				</table>
+{% endfor %}
+				<div class="pagenation">
+        {% if page.has_previous %}
+            <a href="?page=1">首页</a>
+            <a href="?page={{ page.number|add:-1 }}">上一页</a>
+        {% endif %}
+
+        {% for index in page.paginator.page_range %}
+            {% if index == page.number %}
+                <a href="#" class="active">{{ index }}</a>
+            {% else %}
+                <a href="?page={{ index }}">{{ index }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page.has_next %}
+            <a href="?page={{ page.number|add:1 }}">下一页</a>
+            <a href="?page={{ page.paginator.num_pages }}">末页</a>
+        {% endif %}				</div>
+		</div>
+	</div>
+{% endblock body %}
